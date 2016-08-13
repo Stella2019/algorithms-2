@@ -77,7 +77,7 @@ def partition(myList, start, end, position):
     myList[right]=temp
     return right
 
-def sumWeightedCompletionTimes(myList):
+def sumWeightedCompletionTimes():
     global jobs
     '''given a list with format [job_weight, job_length, weight - length]
     it uses quicksort to order them by decreasing order of weight - length.
@@ -86,11 +86,11 @@ def sumWeightedCompletionTimes(myList):
     jobs.reverse()
     completion_time = 0
     sum_weighted_completion_time = 0
-    for job in myList:
+    for job in jobs:
         completion_time += job[1]
         sum_weighted_completion_time += job[0] * completion_time
     return sum_weighted_completion_time
 
 
-sum_weighted_completion_time = sumWeightedCompletionTimes(jobs)
+sum_weighted_completion_time = sumWeightedCompletionTimes()
 print 'result: ' + str(sum_weighted_completion_time)
