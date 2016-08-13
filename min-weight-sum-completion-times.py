@@ -19,8 +19,8 @@
 # answer. You should report the sum of weighted completion times of the resulting schedule --- a positive integer. 
 
 # load contents of text file into a list numList
-# NUMLIST_FILENAME = "data/mwsct.txt" # diff: 69120458973
-NUMLIST_FILENAME = "data/tests/mwsct-test-1.txt" # diff: 31814
+NUMLIST_FILENAME = "data/mwsct.txt" # diff: 69119377652
+# NUMLIST_FILENAME = "data/tests/mwsct-test-1.txt" # diff: 31814
 # NUMLIST_FILENAME = "data/tests/mwsct-test-2.txt" # diff: 61545
 # NUMLIST_FILENAME = "data/tests/mwsct-test-3.txt" # diff: 688647
 
@@ -36,54 +36,15 @@ for f in inFile:
         weight, length = map(int, f.split())
         jobs.append([weight, length, weight - length])
 
-def quicksort(myList, start, end, position):
-    '''quicksort method to sort multi lists specifying 
-    the position of the sortered element of inner list'''
-    if start < end:
-        # partition the list
-        pivot = partition(myList, start, end, position)
-        # sort both halves
-        quicksort(myList, start, pivot-1, position)
-        quicksort(myList, pivot+1, end, position)
-    return myList
-
-def partition(myList, start, end, position):
-    '''partition of quicksort method to sort multi lists specifying 
-    the position of the sortered element of inner list, with a small 
-    modification to order equal elements by decreasing order of 
-    first element of the inner list'''
-    pivot = myList[start][position]
-    left = start+1
-    right = end
-    done = False
-    while not done:
-        while left <= right and myList[left][position] <= pivot:
-            # order by greater weight if are equal
-            if myList[left][position] == pivot and myList[left][0] > myList[start][0]:
-                break
-            left = left + 1
-        while myList[right][position] >= pivot and right >=left:
-            right = right -1
-        if right < left:
-            done= True
-        else:
-            # swap places
-            temp=myList[left]
-            myList[left]=myList[right]
-            myList[right]=temp
-    # swap start with myList[right]
-    temp=myList[start]
-    myList[start]=myList[right]
-    myList[right]=temp
-    return right
-
 def sumWeightedCompletionTimes():
     global jobs
     '''given a list with format [job_weight, job_length, weight - length]
-    it uses quicksort to order them by decreasing order of weight - length.
-    Return the sum of completion times.'''
-    quicksort(jobs, 0, len(jobs)-1, 2)
-    jobs.reverse()
+    it uses two sorts, one to order them by decreasing order of weight 
+    and the other to order them in decreasing order of weight - length.
+    Cause sorted function is stable we keep the equal comparision ordered
+    by decreasing weight as required. Return the sum of completion times.'''
+    jobs = sorted(jobs, key=lambda x: x[0], reverse=True)
+    jobs = sorted(jobs, key=lambda x: x[2], reverse=True)
     completion_time = 0
     sum_weighted_completion_time = 0
     for job in jobs:
