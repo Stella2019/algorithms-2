@@ -30,7 +30,7 @@
 # distances without explicitly looking at every pair of nodes?
 
 # load contents of text file into a list numList
-NUMLIST_FILENAME = "data/msk-clustering-big.txt" # result: 106
+NUMLIST_FILENAME = "data/msk-clustering-big.txt" # result: result: 6118
 # NUMLIST_FILENAME = "data/tests/msk-clustering-2.1.txt" # result: 2
 # NUMLIST_FILENAME = "data/tests/msk-clustering-2.2.txt" # result: 2
 
@@ -38,37 +38,58 @@ inFile = open(NUMLIST_FILENAME, 'r')
 
 bits = []
 graph = []
+far_nodes = {}
 merged_nodes = {} 
 clusters_merged = 0
-num_clusters = 0
+num_nodes = 0
 num_bits = 0
 node = 1
 spacing = 3
 
 for f in inFile:
-    if(num_clusters == 0):
-        num_clusters, num_bits = map(int, f.split())
+    if(num_nodes == 0):
+        num_nodes, num_bits = map(int, f.split())
     else:
         distance = str(f.strip())
         distance = "".join(distance.split())
         bits.append([node, distance])
         node += 1
 
-def hammingDist(s1, s2):
-    """Calculate the hamming distance between two bit strings"""
-    assert len(s1) == len(s2)
-    return sum(c1 != c2 for c1, c2 in zip(s1, s2))
+num_clusters = num_nodes
 
+def hammingDist(s1, s2, spacing):
+    """Calculate the hamming distance between two bit strings"""
+    distance = 0
+    for c1, c2 in zip(s1, s2):
+        if distance >= spacing:
+            distance = spacing + 1
+            break
+        if c1 != c2:
+            distance += 1
+
+    return distance
+
+print 'initial num_nodes: ' + str(num_nodes)
+    
 for n in bits:
-    for i in range(n[0], num_clusters):
-        graph.append([n[0], i+1, hammingDist(n[1], bits[i][1])])
-        
+    for i in range(n[0], num_nodes):
+        same_cluster = False
+        if n[0] in merged_nodes and i+1 in merged_nodes:
+            if merged_nodes[n[0]] == merged_nodes[i+1]:
+                continue
+            
+        distance = hammingDist(n[1], bits[i][1], spacing)
+
+        if distance < spacing:
+            graph.append([n[0], i+1, distance])
+
+
 # sorting graph by increasing order of edge cost
 graph = sorted(graph, key=lambda x: x[2])
 
 index = 0
 
-while graph[0][2] < spacing:
+while len(graph) > 0 and graph[0][2] < spacing:
     merged = False
 
     # merge of single node to a clusters
